@@ -1,30 +1,22 @@
 #!/usr/bin/env bash
-set -e
+set -Eeuo pipefail
 
-echo "=========================================="
-echo "🚀 Myanmar Health Auto-Deployment Started"
-echo "=========================================="
+APP_DIR="${APP_DIR:-/opt/myanmar-health}"
+BRANCH="${BRANCH:-main}"
 
-# 1. Ensure Docker and Docker Compose are installed
-if ! command -v docker &> /dev/null; then
-    echo "📦 Installing Docker and Docker Compose plugin..."
-    curl -fsSL https://get.docker.com -o get-docker.sh
-    sh get-docker.sh
-    rm -f get-docker.sh
-    systemctl enable --now docker
+if docker compose version >/dev/null 2>&1; then
+  COMPOSE=(docker compose)
+elif command -v docker-compose >/dev/null 2>&1; then
+  COMPOSE=(docker-compose)
+else
+  echo "Docker Compose is not installed" >&2
+  exit 1
 fi
 
-# 2. Pull latest code from GitHub
-echo "📥 Pulling latest updates from Git repository..."
-git fetch --all
-git reset --hard origin/main || git reset --hard origin/master
-git pull
-
-# 3. Build and restart Docker containers
-echo "🐳 Rebuilding and starting Docker containers (App + PostgreSQL)..."
-docker compose down || true
-docker compose up -d --build --remove-orphans
-
-# 4. Show status
-echo "✅ Deployment Successful!"
-docker compose ps
+cd "$APP_DIR"
+git fetch origin "$BRANCH"
+git checkout "$BRANCH"
+git reset --hard "origin/$BRANCH"
+"${COMPOSE[@]}" up -d --build --remove-orphans
+docker image prune -f
+"${COMPOSE[@]}" ps
