@@ -17,6 +17,9 @@ cd "$APP_DIR"
 git fetch origin "$BRANCH"
 git checkout "$BRANCH"
 git reset --hard "origin/$BRANCH"
+if [ "${COMPOSE[0]}" = "docker-compose" ]; then
+  docker ps -aq --filter name=myanmarhealth_app | xargs -r docker rm -f
+fi
 "${COMPOSE[@]}" up -d --build --remove-orphans
 docker image prune -f
 "${COMPOSE[@]}" ps
