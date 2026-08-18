@@ -17,7 +17,7 @@ cd "$APP_DIR"
 git fetch origin "$BRANCH"
 git checkout "$BRANCH"
 git reset --hard "origin/$BRANCH"
-if command -v nginx >/dev/null 2>&1 && [ -f "$APP_DIR/deploy/nginx-showkyaw.conf" ]; then
+if command -v nginx >/dev/null 2>&1 && [ -f "$APP_DIR/deploy/nginx-showkyaw.conf" ] && [ ! -f /etc/letsencrypt/live/showkyaw.com/fullchain.pem ]; then
   install -m 644 "$APP_DIR/deploy/nginx-showkyaw.conf" /etc/nginx/sites-available/showkyaw.com
   ln -sfn /etc/nginx/sites-available/showkyaw.com /etc/nginx/sites-enabled/showkyaw.com
   nginx -t
