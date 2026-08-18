@@ -69,9 +69,9 @@ func (h *AiHandler) Advisor(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	apiKey := os.Getenv("GEMINI_API_KEY")
+	apiKey := os.Getenv("OPENROUTER_API_KEY")
 	if apiKey == "" {
-		http.Error(w, "GEMINI_API_KEY is not configured", http.StatusInternalServerError)
+		http.Error(w, "OPENROUTER_API_KEY is not configured", http.StatusInternalServerError)
 		return
 	}
 

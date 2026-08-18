@@ -15,9 +15,9 @@ const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
 const OPENROUTER_MODEL = "google/gemini-3.7-flash";
 
 function getApiKey(): string {
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) {
-    throw new Error("GEMINI_API_KEY environment variable is required.");
+    throw new Error("OPENROUTER_API_KEY environment variable is required.");
   }
   return apiKey;
 }
