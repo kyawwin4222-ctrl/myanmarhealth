@@ -232,6 +232,7 @@ export default function App() {
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
       let fullContent = "";
+      let pending = "";
 
       if (!reader) throw new Error("No response body");
 
@@ -239,8 +240,9 @@ export default function App() {
         const { done, value } = await reader.read();
         if (done) break;
 
-        const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split("\n");
+        pending += decoder.decode(value, { stream: true });
+        const lines = pending.split("\n");
+        pending = lines.pop() || "";
 
         for (const line of lines) {
           if (line.startsWith("data: ")) {
@@ -267,6 +269,16 @@ export default function App() {
               }
             }
           }
+        }
+      }
+
+      pending += decoder.decode();
+      if (pending.startsWith("data: ")) {
+        const data = pending.slice(6).trim();
+        if (data && data !== "[DONE]") {
+          const parsed = JSON.parse(data);
+          const content = parsed.choices?.[0]?.delta?.content;
+          if (content) fullContent += content;
         }
       }
 
