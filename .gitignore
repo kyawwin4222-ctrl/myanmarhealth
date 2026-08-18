@@ -1,0 +1,14 @@
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
+ServerAccess.md
+serveraccess.md
+Server.md.txt
+
+# Local deployment/runtime files
+.postgres-data/

@@ -1,0 +1,6 @@
+{
+  "name": "ဆေးပညာနှင့် အိမ်တွင်းကုသမှုလမ်းညွှန်",
+  "description": "အိမ်တွင်းဖြစ် ဝေဒနာများအတွက် သဘာဝဆေးနည်းများ၊ ရှေးဦးသူနာပြုစုနည်းများနှင့် AI အကြံပေးစနစ်ပါဝင်သော ကျန်းမာရေးလမ်းညွှန်",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
