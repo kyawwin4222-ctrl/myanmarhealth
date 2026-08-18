@@ -32,7 +32,7 @@ interface PricingInfo {
   promoNoteEn: string;
 }
 
-const BACKEND_URL = "http://localhost:8080";
+const BACKEND_URL = "";
 
 export const StoreModal: React.FC<StoreModalProps> = ({ isOpen, onClose, lang }) => {
   const { userProfile, currentUser } = useAuth();

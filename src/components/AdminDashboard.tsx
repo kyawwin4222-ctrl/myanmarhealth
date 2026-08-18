@@ -36,7 +36,7 @@ interface PricingForm {
   promoNoteEn: string;
 }
 
-const BACKEND_URL = "http://localhost:8080";
+const BACKEND_URL = "";
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({ lang, onClose }) => {
   const [activeAdminTab, setActiveAdminTab] = useState<"users" | "subscriptions" | "pricing">("users");

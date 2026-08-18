@@ -17,6 +17,12 @@ cd "$APP_DIR"
 git fetch origin "$BRANCH"
 git checkout "$BRANCH"
 git reset --hard "origin/$BRANCH"
+if command -v nginx >/dev/null 2>&1 && [ -f "$APP_DIR/deploy/nginx-showkyaw.conf" ]; then
+  install -m 644 "$APP_DIR/deploy/nginx-showkyaw.conf" /etc/nginx/sites-available/showkyaw.com
+  ln -sfn /etc/nginx/sites-available/showkyaw.com /etc/nginx/sites-enabled/showkyaw.com
+  nginx -t
+  systemctl reload nginx
+fi
 if [ "${COMPOSE[0]}" = "docker-compose" ]; then
   docker ps -aq --filter name=myanmarhealth_app | xargs -r docker rm -f
 fi
