@@ -40,21 +40,7 @@ COPY --from=frontend-builder /app/src ./src
 COPY --from=backend-builder /app/server ./backend-server
 RUN mkdir -p /app/data
 
-# Start script
-COPY <<-"EOF" /app/start.sh
-#!/bin/sh
-echo "Starting Go Backend..."
-/app/backend-server &
-BACKEND_PID=$!
-
-echo "Starting Frontend Server..."
-npm run dev -- --host 0.0.0.0 --port 3000 &
-FRONTEND_PID=$!
-
-trap "kill $BACKEND_PID $FRONTEND_PID" SIGTERM SIGINT
-wait
-EOF
-
+COPY start.sh /app/start.sh
 RUN chmod +x /app/start.sh
 
 EXPOSE 3000 8080
