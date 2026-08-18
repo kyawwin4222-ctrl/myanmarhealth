@@ -24,7 +24,7 @@ if command -v nginx >/dev/null 2>&1 && [ -f "$APP_DIR/deploy/nginx-showkyaw.conf
   systemctl reload nginx
 fi
 if [ "${COMPOSE[0]}" = "docker-compose" ]; then
-  docker ps -aq --filter name=myanmarhealth_app | xargs -r docker rm -f
+  docker ps -aq --filter name=myanmarhealth | xargs -r docker rm -f
 fi
 "${COMPOSE[@]}" up -d --build --remove-orphans
 docker image prune -f
