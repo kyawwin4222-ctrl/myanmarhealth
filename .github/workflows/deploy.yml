@@ -1,24 +1,45 @@
-name: Deploy
+name: Auto Deploy to VPS on Push
 
 on:
   push:
-    branches: [main]
-
-concurrency:
-  group: production-deploy
-  cancel-in-progress: true
+    branches:
+      - main
+      - master
 
 jobs:
   deploy:
+    name: Deploy to VPS Server
     runs-on: ubuntu-latest
+
     steps:
-      - name: Deploy on VPS
-        uses: appleboy/ssh-action@v1.2.0
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Execute Remote Deployment via SSH
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
+          password: ${{ secrets.VPS_PASSWORD }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT || 22 }}
           script: |
-            cd /opt/myanmar-health
+            set -e
+            echo "🚀 Connecting to VPS for deployment..."
+            
+            APP_DIR="/var/www/myanmar-health"
+            
+            # Create project directory if it does not exist
+            if [ ! -d "$APP_DIR" ]; then
+              echo "📂 Initializing project repository..."
+              mkdir -p "$APP_DIR"
+              git clone ${{ github.server_url }}/${{ github.repository }}.git "$APP_DIR"
+            fi
+            
+            cd "$APP_DIR"
+            
+            # Make deploy script executable and run
+            chmod +x deploy.sh
             ./deploy.sh
+            
+            echo "🎉 Deployment Completed Successfully!"
