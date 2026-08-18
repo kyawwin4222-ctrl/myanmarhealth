@@ -36,6 +36,7 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=8080
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
       - DATABASE_URL=postgres://${POSTGRES_USER:-myanmarhealth}:${POSTGRES_PASSWORD:-myanmarhealth_secret_pass}@postgres:5432/${POSTGRES_DB:-myanmarhealth_db}?sslmode=disable
     volumes:
       - ./backend/data:/app/data
