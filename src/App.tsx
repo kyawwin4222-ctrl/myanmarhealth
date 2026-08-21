@@ -98,10 +98,12 @@ export default function App() {
     }
   }, [lang]);
 
-  // Smart scroll — only auto-scroll if user is near the bottom
+  // Smart scroll - only auto-scroll the chat container (not the whole page)
   useEffect(() => {
+    const el = chatContainerRef.current;
+    if (!el) return;
     if (!userScrolledUp.current) {
-      chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
     }
   }, [messages]);
 
