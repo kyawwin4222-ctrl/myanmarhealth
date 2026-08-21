@@ -12,3 +12,6 @@ Server.md.txt
 
 # Local deployment/runtime files
 .postgres-data/
+vps-setup.cjs
+vps-find.cjs
+
