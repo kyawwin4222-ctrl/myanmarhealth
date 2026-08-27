@@ -209,10 +209,20 @@ export default function App() {
       return;
     }
 
+    // Move current Q&A to history before starting new conversation
+    const prevMessages = messages.filter(m => m.role !== "assistant" || m.content !== "");
+    if (prevMessages.length >= 2) {
+      const userMsgs = prevMessages.filter(m => m.role === "user");
+      const assistantMsgs = prevMessages.filter(m => m.role === "assistant" && m.content);
+      if (userMsgs.length > 0 && assistantMsgs.length > 0) {
+        setChatHistory(prev => [...prev, { question: userMsgs[userMsgs.length - 1].content, answer: assistantMsgs[assistantMsgs.length - 1].content }]);
+      }
+    }
+
     // Add user message + empty assistant placeholder
     const currentHistory: Array<{ role: "user" | "assistant"; content: string }> = [];
 
-    setMessages(prev => [...prev, { role: "user" as const, content: prompt }, { role: "assistant" as const, content: "" }]);
+    setMessages([{ role: "user" as const, content: prompt }, { role: "assistant" as const, content: "" }]);
     setInputMessage("");
     setIsAiLoading(true);
 
@@ -301,8 +311,8 @@ export default function App() {
           }
         ]);
       } else {
-        setChatHistory(prev => [...prev, { question: prompt, answer: fullContent }]);
-        setMessages([]);
+        // Keep the Q&A visible in the chat window.
+        // It will be moved to history when the user sends a new question.
       }
     } catch (error: any) {
       console.error(error);
@@ -991,10 +1001,35 @@ export default function App() {
                     ) : (
                       <div className="max-h-56 overflow-y-auto space-y-1.5">
                         {chatHistory.map((item, index) => (
-                          <details key={index} className="group rounded-xl border border-white/10 bg-white/5 p-3 text-xs">
-                            <summary className="cursor-pointer truncate font-medium text-slate-200 group-open:text-teal-300">{item.question}</summary>
-                            <p className="mt-2 whitespace-pre-line border-t border-white/10 pt-2 text-slate-400 leading-relaxed">{item.answer}</p>
-                          </details>
+                          <button
+                            key={index}
+                            onClick={() => {
+                              // Archive current chat to history first (if it has a completed Q&A)
+                              const prev = messages.filter(m => m.role !== "assistant" || m.content !== "");
+                              if (prev.length >= 2) {
+                                const uMsgs = prev.filter(m => m.role === "user");
+                                const aMsgs = prev.filter(m => m.role === "assistant" && m.content);
+                                if (uMsgs.length > 0 && aMsgs.length > 0) {
+                                  setChatHistory(h => [
+                                    ...h.filter((_, i) => i !== index),
+                                    { question: uMsgs[uMsgs.length - 1].content, answer: aMsgs[aMsgs.length - 1].content }
+                                  ]);
+                                } else {
+                                  setChatHistory(h => h.filter((_, i) => i !== index));
+                                }
+                              } else {
+                                setChatHistory(h => h.filter((_, i) => i !== index));
+                              }
+                              // Load selected history item into chat window
+                              setMessages([
+                                { role: "user", content: item.question },
+                                { role: "assistant", content: item.answer }
+                              ]);
+                            }}
+                            className="w-full text-left rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 p-3 text-xs transition-all group"
+                          >
+                            <span className="truncate block font-medium text-slate-200 group-hover:text-teal-300">{item.question}</span>
+                          </button>
                         ))}
                       </div>
                     )}
