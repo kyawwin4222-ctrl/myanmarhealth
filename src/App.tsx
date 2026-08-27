@@ -811,11 +811,11 @@ export default function App() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -15 }}
                 transition={{ duration: 0.2 }}
-                className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+                className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6 min-h-[calc(100dvh-180px)]"
               >
                 
                 {/* Chat window column */}
-                <div className="lg:col-span-2 flex flex-col bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden min-h-[400px] h-[calc(100vh-280px)] md:min-h-[500px] md:h-[600px]">
+                <div className="lg:col-span-2 flex flex-col bg-white rounded-2xl lg:rounded-3xl shadow-xl border border-slate-100 overflow-hidden min-h-[calc(100dvh-240px)] h-[calc(100dvh-240px)] md:min-h-[600px] md:h-[calc(100dvh-220px)]">
                   
                   {/* Chat header status */}
                   <div className="bg-teal-800 text-white px-4 py-3 md:px-6 md:py-4 flex items-center justify-between">
@@ -856,20 +856,6 @@ export default function App() {
                   </div>
 
                   {/* Message body */}
-                  {chatHistory.length > 0 && (
-                    <div className="border-b border-slate-200 bg-white px-4 py-3 sm:px-6">
-                      <h4 className="text-xs font-bold text-teal-800 mb-2">{lang === "mm" ? "မေးမြန်းထားသော History" : "Chat History"}</h4>
-                      <div className="max-h-28 overflow-y-auto space-y-1.5">
-                        {chatHistory.map((item, index) => (
-                          <details key={index} className="text-xs text-slate-600">
-                            <summary className="cursor-pointer truncate hover:text-teal-700">{item.question}</summary>
-                            <p className="mt-1 pl-3 whitespace-pre-line text-slate-500">{item.answer}</p>
-                          </details>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
                   <div ref={chatContainerRef} onScroll={handleChatScroll} className="flex-grow overflow-y-auto p-4 sm:p-6 space-y-4 bg-slate-50/50">
                     {messages.map((msg, index) => (
                       <div
@@ -987,6 +973,27 @@ export default function App() {
 
                 {/* FAQ Template Side-Panel column */}
                 <div className="space-y-6">
+                  <div className="bg-white rounded-2xl p-4 shadow-xl border border-slate-100 lg:sticky lg:top-24">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2">
+                        <History className="h-4 w-4 text-teal-700" />
+                        {lang === "mm" ? "မေးမြန်းမှတ်တမ်း" : "History"}
+                      </h3>
+                      <span className="text-[10px] text-slate-400">{chatHistory.length}</span>
+                    </div>
+                    {chatHistory.length === 0 ? (
+                      <p className="text-xs text-slate-400 py-3">{lang === "mm" ? "မေးမြန်းထားသော မှတ်တမ်းမရှိသေးပါ။" : "No conversations yet."}</p>
+                    ) : (
+                      <div className="max-h-56 overflow-y-auto space-y-1.5">
+                        {chatHistory.map((item, index) => (
+                          <details key={index} className="group rounded-xl border border-slate-100 bg-slate-50/70 p-2.5 text-xs">
+                            <summary className="cursor-pointer truncate font-medium text-slate-700 group-open:text-teal-800">{item.question}</summary>
+                            <p className="mt-2 whitespace-pre-line border-t border-slate-200 pt-2 text-slate-500 leading-relaxed">{item.answer}</p>
+                          </details>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                   
                   {/* AI Quick start suggestions */}
                   <div className="bg-white rounded-3xl p-4 md:p-6 shadow-xl border border-slate-100">
