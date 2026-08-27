@@ -31,7 +31,8 @@ import {
   Shield,
   LogIn,
   Crown,
-  Ban
+  Ban,
+  History as HistoryIcon
 } from "lucide-react";
 import {
   HERBS_DATA,
@@ -976,7 +977,7 @@ export default function App() {
                   <div className="bg-white rounded-2xl p-4 shadow-xl border border-slate-100 lg:sticky lg:top-24">
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2">
-                        <History className="h-4 w-4 text-teal-700" />
+                        <HistoryIcon className="h-4 w-4 text-teal-700" />
                         {lang === "mm" ? "မေးမြန်းမှတ်တမ်း" : "History"}
                       </h3>
                       <span className="text-[10px] text-slate-400">{chatHistory.length}</span>
