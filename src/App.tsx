@@ -812,11 +812,11 @@ export default function App() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -15 }}
                 transition={{ duration: 0.2 }}
-                className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6 min-h-[calc(100dvh-180px)]"
+                className="grid grid-cols-1 lg:grid-cols-[280px_minmax(0,1fr)] gap-4 lg:gap-6 min-h-[calc(100dvh-180px)]"
               >
                 
                 {/* Chat window column */}
-                <div className="lg:col-span-2 flex flex-col bg-white rounded-2xl lg:rounded-3xl shadow-xl border border-slate-100 overflow-hidden min-h-[calc(100dvh-240px)] h-[calc(100dvh-240px)] md:min-h-[600px] md:h-[calc(100dvh-220px)]">
+                <div className="lg:col-span-1 lg:order-2 flex flex-col bg-white rounded-2xl lg:rounded-3xl shadow-xl border border-slate-100 overflow-hidden min-h-[calc(100dvh-240px)] h-[calc(100dvh-240px)] md:min-h-[600px] md:h-[calc(100dvh-220px)]">
                   
                   {/* Chat header status */}
                   <div className="bg-teal-800 text-white px-4 py-3 md:px-6 md:py-4 flex items-center justify-between">
@@ -835,6 +835,10 @@ export default function App() {
                       </div>
                     </div>
 
+                    <div className="hidden sm:flex items-center gap-2 text-[11px] text-teal-200 mr-2">
+                      <span className="h-2 w-2 rounded-full bg-emerald-300 animate-pulse" />
+                      {lang === "mm" ? "လုံခြုံစွာ မေးမြန်းနိုင်ပါသည်" : "Private conversation"}
+                    </div>
                     <button
                       id="btn-reset-chat"
                       onClick={() => {
@@ -973,23 +977,23 @@ export default function App() {
                 </div>
 
                 {/* FAQ Template Side-Panel column */}
-                <div className="space-y-6">
-                  <div className="bg-white rounded-2xl p-4 shadow-xl border border-slate-100 lg:sticky lg:top-24">
+                <div className="lg:col-span-1 lg:order-1 space-y-4 lg:sticky lg:top-24 lg:self-start">
+                  <div className="bg-slate-900 rounded-2xl p-4 shadow-xl border border-slate-800 text-white">
                     <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2">
+                      <h3 className="text-sm font-bold text-white flex items-center gap-2">
                         <HistoryIcon className="h-4 w-4 text-teal-700" />
                         {lang === "mm" ? "မေးမြန်းမှတ်တမ်း" : "History"}
                       </h3>
-                      <span className="text-[10px] text-slate-400">{chatHistory.length}</span>
+                      <span className="text-[10px] text-slate-400 bg-white/10 px-2 py-1 rounded-full">{chatHistory.length}</span>
                     </div>
                     {chatHistory.length === 0 ? (
-                      <p className="text-xs text-slate-400 py-3">{lang === "mm" ? "မေးမြန်းထားသော မှတ်တမ်းမရှိသေးပါ။" : "No conversations yet."}</p>
+                      <p className="text-xs text-slate-400 py-6 text-center">{lang === "mm" ? "မေးမြန်းထားသော မှတ်တမ်းမရှိသေးပါ။" : "No conversations yet."}</p>
                     ) : (
                       <div className="max-h-56 overflow-y-auto space-y-1.5">
                         {chatHistory.map((item, index) => (
-                          <details key={index} className="group rounded-xl border border-slate-100 bg-slate-50/70 p-2.5 text-xs">
-                            <summary className="cursor-pointer truncate font-medium text-slate-700 group-open:text-teal-800">{item.question}</summary>
-                            <p className="mt-2 whitespace-pre-line border-t border-slate-200 pt-2 text-slate-500 leading-relaxed">{item.answer}</p>
+                          <details key={index} className="group rounded-xl border border-white/10 bg-white/5 p-3 text-xs">
+                            <summary className="cursor-pointer truncate font-medium text-slate-200 group-open:text-teal-300">{item.question}</summary>
+                            <p className="mt-2 whitespace-pre-line border-t border-white/10 pt-2 text-slate-400 leading-relaxed">{item.answer}</p>
                           </details>
                         ))}
                       </div>
@@ -997,7 +1001,7 @@ export default function App() {
                   </div>
                   
                   {/* AI Quick start suggestions */}
-                  <div className="bg-white rounded-3xl p-4 md:p-6 shadow-xl border border-slate-100">
+                  <div className="bg-white rounded-2xl p-4 shadow-xl border border-slate-100">
                     <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 flex items-center gap-2">
                       <HelpCircle className="h-4 w-4 text-teal-700" />
                       {t.suggestedQueries}
