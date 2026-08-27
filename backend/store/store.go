@@ -1,6 +1,7 @@
 package store
 
 import (
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -20,6 +21,45 @@ type Store struct {
 	settingPath string
 	users       map[string]*models.User
 	pricing     models.PricingSettings
+	db          *sql.DB
+}
+
+func (s *Store) SetDatabase(db *sql.DB) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.db = db
+	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS users (firebase_uid TEXT PRIMARY KEY, user_data JSONB NOT NULL, updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW())`)
+	if err != nil { return err }
+	var count int
+	if err = db.QueryRow(`SELECT COUNT(*) FROM users`).Scan(&count); err != nil { return err }
+	if count == 0 {
+		if err = s.saveDatabase(); err != nil { return err }
+	} else {
+		rows, queryErr := db.Query(`SELECT user_data FROM users`)
+		if queryErr != nil { return queryErr }
+		defer rows.Close()
+		loaded := make(map[string]*models.User)
+		for rows.Next() {
+			var data []byte
+			if err = rows.Scan(&data); err != nil { return err }
+			var user models.User
+			if err = json.Unmarshal(data, &user); err != nil { return err }
+			loaded[user.ID] = &user
+		}
+		if err = rows.Err(); err != nil { return err }
+		s.users = loaded
+	}
+	return nil
+}
+
+func (s *Store) saveDatabase() error {
+	if s.db == nil { return nil }
+	for _, user := range s.users {
+		data, err := json.Marshal(user)
+		if err != nil { return err }
+		if _, err = s.db.Exec(`INSERT INTO users (firebase_uid, user_data) VALUES ($1, $2) ON CONFLICT (firebase_uid) DO UPDATE SET user_data = EXCLUDED.user_data, updated_at = NOW()`, user.FirebaseUID, data); err != nil { return err }
+	}
+	return nil
 }
 
 func NewStore(filePath string) (*Store, error) {
@@ -165,7 +205,8 @@ func (s *Store) save() error {
 		return err
 	}
 
-	return os.WriteFile(s.filePath, data, 0644)
+	if err := os.WriteFile(s.filePath, data, 0644); err != nil { return err }
+	return s.saveDatabase()
 }
 
 func (s *Store) GetAllUsers() []*models.User {

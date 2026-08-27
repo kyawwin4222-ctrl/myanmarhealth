@@ -81,6 +81,7 @@ func main() {
 		if err = db.Ping(); err != nil { log.Fatalf("Failed to connect PostgreSQL: %v", err) }
 		_, err = db.Exec(`CREATE TABLE IF NOT EXISTS chat_history (id BIGSERIAL PRIMARY KEY, firebase_uid TEXT NOT NULL, user_message TEXT NOT NULL, ai_response TEXT NOT NULL, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW())`)
 		if err != nil { log.Fatalf("Failed to initialize chat history: %v", err) }
+		if err = userStore.SetDatabase(db); err != nil { log.Fatalf("Failed to initialize users database: %v", err) }
 		defer db.Close()
 	}
 	aiHandler := handlers.NewAiHandler(userStore, db)
