@@ -69,6 +69,7 @@ export default function App() {
 
   // AI Chat States
   const [messages, setMessages] = useState<Array<{ role: "user" | "assistant"; content: string }>>([]);
+  const [chatHistory, setChatHistory] = useState<Array<{ question: string; answer: string }>>([]);
   const [inputMessage, setInputMessage] = useState("");
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
@@ -197,10 +198,6 @@ export default function App() {
       return;
     }
 
-    if (messages.some(message => message.role === "user")) {
-      return;
-    }
-
     // 1. Client-side suspension check
     if (isSuspended) {
       alert(
@@ -302,6 +299,9 @@ export default function App() {
               : "Something went wrong. Please try again."
           }
         ]);
+      } else {
+        setChatHistory(prev => [...prev, { question: prompt, answer: fullContent }]);
+        setMessages([]);
       }
     } catch (error: any) {
       console.error(error);
@@ -856,6 +856,20 @@ export default function App() {
                   </div>
 
                   {/* Message body */}
+                  {chatHistory.length > 0 && (
+                    <div className="border-b border-slate-200 bg-white px-4 py-3 sm:px-6">
+                      <h4 className="text-xs font-bold text-teal-800 mb-2">{lang === "mm" ? "မေးမြန်းထားသော History" : "Chat History"}</h4>
+                      <div className="max-h-28 overflow-y-auto space-y-1.5">
+                        {chatHistory.map((item, index) => (
+                          <details key={index} className="text-xs text-slate-600">
+                            <summary className="cursor-pointer truncate hover:text-teal-700">{item.question}</summary>
+                            <p className="mt-1 pl-3 whitespace-pre-line text-slate-500">{item.answer}</p>
+                          </details>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   <div ref={chatContainerRef} onScroll={handleChatScroll} className="flex-grow overflow-y-auto p-4 sm:p-6 space-y-4 bg-slate-50/50">
                     {messages.map((msg, index) => (
                       <div
@@ -948,7 +962,7 @@ export default function App() {
                       type="text"
                       value={inputMessage}
                       onChange={(e) => setInputMessage(e.target.value)}
-                      disabled={isAiLoading || isSuspended || messages.some(message => message.role === "user")}
+                      disabled={isAiLoading || isSuspended}
                       placeholder={
                         isSuspended
                           ? lang === "mm"
@@ -963,7 +977,7 @@ export default function App() {
                     <button
                       id="btn-send-message"
                       type="submit"
-                      disabled={isAiLoading || !inputMessage.trim() || isSuspended || messages.some(message => message.role === "user")}
+                      disabled={isAiLoading || !inputMessage.trim() || isSuspended}
                       className="bg-teal-800 hover:bg-teal-700 disabled:bg-slate-100 disabled:text-slate-400 text-white p-3.5 rounded-xl flex items-center justify-center transition-colors shadow-sm disabled:cursor-not-allowed"
                     >
                       <Send className="h-4 w-4" />
@@ -1656,6 +1670,10 @@ export default function App() {
       {/* Modern, elegant Footer */}
       <footer className="bg-slate-950 text-slate-400 py-10 mt-auto border-t border-slate-900 mb-14 md:mb-0">
         <div className="max-w-6xl mx-auto px-4 text-center space-y-4">
+          <div className="text-base sm:text-lg font-semibold text-teal-300">
+            Created by Kyaw Win
+          </div>
+
           <div className="flex items-center justify-center gap-2">
             <Leaf className="h-5 w-5 text-teal-500" />
             <span className="font-display font-bold text-white text-base">{t.title}</span>
@@ -1666,10 +1684,6 @@ export default function App() {
               ? "ဤစနစ်ရှိ အကြံပြုချက်များသည် အချက်အလက်များ လေ့လာစရာအဖြစ်သာ ရည်ရွယ်ပြီး ကျွမ်းကျင်ဆေးကုသမှုကို အစားမထိုးပါ။"
               : "This service provides educational recommendations and should not replace clinical medical consults."}
           </p>
-
-          <div className="text-[10px] text-slate-600 font-mono">
-            Created by Kyaw Win
-          </div>
 
           <div className="text-[10px] text-slate-600 font-mono">
             &copy; {new Date().getFullYear()} - ဆေးပညာနှင့် အိမ်တွင်းဆေးကုသခြင်း | Dual-Language Built with Gemini
