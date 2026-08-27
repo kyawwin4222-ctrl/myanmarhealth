@@ -32,8 +32,7 @@ import {
   LogIn,
   Crown,
   Ban,
-  History as HistoryIcon,
-  Menu
+  History as HistoryIcon
 } from "lucide-react";
 import {
   HERBS_DATA,
@@ -72,7 +71,6 @@ export default function App() {
   // AI Chat States
   const [messages, setMessages] = useState<Array<{ role: "user" | "assistant"; content: string }>>([]);
   const [chatHistory, setChatHistory] = useState<Array<{ question: string; answer: string }>>([]);
-  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [inputMessage, setInputMessage] = useState("");
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
@@ -823,13 +821,6 @@ export default function App() {
                   {/* Chat header status */}
                   <div className="bg-teal-800 text-white px-4 py-3 md:px-6 md:py-4 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <button
-                        className="lg:hidden p-2 -ml-2 rounded-lg hover:bg-teal-700"
-                        onClick={() => setIsHistoryOpen(true)}
-                        aria-label="Open chat history"
-                      >
-                        <Menu className="h-5 w-5" />
-                      </button>
                       <div className="bg-teal-700/60 p-2 rounded-lg text-teal-100">
                         <Sparkles className="h-5 w-5 animate-spin-slow" />
                       </div>
@@ -986,9 +977,8 @@ export default function App() {
                 </div>
 
                 {/* FAQ Template Side-Panel column */}
-                <div className={`${isHistoryOpen ? "fixed inset-0 z-50 flex" : "hidden"} lg:flex lg:col-span-1 lg:order-1 space-y-4 lg:sticky lg:top-24 lg:self-start`}>
-                  <button className="lg:hidden fixed inset-0 bg-slate-950/50" onClick={() => setIsHistoryOpen(false)} aria-label="Close history" />
-                  <div className="relative z-10 w-full max-w-sm h-full overflow-y-auto bg-slate-900 rounded-none lg:rounded-2xl p-4 shadow-xl border border-slate-800 text-white">
+                <div className="lg:col-span-1 lg:order-1 space-y-4 lg:sticky lg:top-24 lg:self-start">
+                  <div className="bg-slate-900 rounded-2xl p-4 shadow-xl border border-slate-800 text-white">
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="text-sm font-bold text-white flex items-center gap-2">
                         <HistoryIcon className="h-4 w-4 text-teal-700" />
@@ -1001,7 +991,7 @@ export default function App() {
                     ) : (
                       <div className="max-h-56 overflow-y-auto space-y-1.5">
                         {chatHistory.map((item, index) => (
-                          <details key={index} onClick={() => { setMessages([{ role: "user", content: item.question }, { role: "assistant", content: item.answer }]); setIsHistoryOpen(false); }} className="group rounded-xl border border-white/10 bg-white/5 p-3 text-xs">
+                          <details key={index} className="group rounded-xl border border-white/10 bg-white/5 p-3 text-xs">
                             <summary className="cursor-pointer truncate font-medium text-slate-200 group-open:text-teal-300">{item.question}</summary>
                             <p className="mt-2 whitespace-pre-line border-t border-white/10 pt-2 text-slate-400 leading-relaxed">{item.answer}</p>
                           </details>
