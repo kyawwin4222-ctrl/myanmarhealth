@@ -9,10 +9,11 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
+	_ "github.com/lib/pq"
 	"myanmarhealth-backend/handlers"
 	"myanmarhealth-backend/store"
-	_ "github.com/lib/pq"
 )
 
 func loadEnvFile(paths ...string) {
@@ -77,11 +78,26 @@ func main() {
 	var db *sql.DB
 	if databaseURL := os.Getenv("DATABASE_URL"); databaseURL != "" {
 		db, err = sql.Open("postgres", databaseURL)
-		if err != nil { log.Fatalf("Failed to open PostgreSQL: %v", err) }
-		if err = db.Ping(); err != nil { log.Fatalf("Failed to connect PostgreSQL: %v", err) }
+		if err != nil {
+			log.Fatalf("Failed to open PostgreSQL: %v", err)
+		}
+		for attempt := 1; attempt <= 30; attempt++ {
+			if err = db.Ping(); err == nil {
+				break
+			}
+			if attempt == 30 {
+				log.Fatalf("Failed to connect PostgreSQL after %d attempts: %v", attempt, err)
+			}
+			log.Printf("Waiting for PostgreSQL (%d/30): %v", attempt, err)
+			time.Sleep(2 * time.Second)
+		}
 		_, err = db.Exec(`CREATE TABLE IF NOT EXISTS chat_history (id BIGSERIAL PRIMARY KEY, firebase_uid TEXT NOT NULL, user_message TEXT NOT NULL, ai_response TEXT NOT NULL, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW())`)
-		if err != nil { log.Fatalf("Failed to initialize chat history: %v", err) }
-		if err = userStore.SetDatabase(db); err != nil { log.Fatalf("Failed to initialize users database: %v", err) }
+		if err != nil {
+			log.Fatalf("Failed to initialize chat history: %v", err)
+		}
+		if err = userStore.SetDatabase(db); err != nil {
+			log.Fatalf("Failed to initialize users database: %v", err)
+		}
 		defer db.Close()
 	}
 	aiHandler := handlers.NewAiHandler(userStore, db)
