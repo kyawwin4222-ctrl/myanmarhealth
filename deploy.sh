@@ -14,9 +14,18 @@ else
 fi
 
 cd "$APP_DIR"
+USER_DATA_BACKUP="/var/lib/myanmar-health/users.json"
+mkdir -p "$(dirname "$USER_DATA_BACKUP")"
+if [ -f "$APP_DIR/backend/data/users.json" ]; then
+  cp "$APP_DIR/backend/data/users.json" "$USER_DATA_BACKUP"
+fi
 git fetch origin "$BRANCH"
 git checkout "$BRANCH"
 git reset --hard "origin/$BRANCH"
+if [ -f "$USER_DATA_BACKUP" ]; then
+  mkdir -p "$APP_DIR/backend/data"
+  cp "$USER_DATA_BACKUP" "$APP_DIR/backend/data/users.json"
+fi
 if command -v nginx >/dev/null 2>&1 && [ -f "$APP_DIR/deploy/nginx-showkyaw.conf" ] && [ ! -f /etc/letsencrypt/live/showkyaw.com/fullchain.pem ]; then
   install -m 644 "$APP_DIR/deploy/nginx-showkyaw.conf" /etc/nginx/sites-available/showkyaw.com
   ln -sfn /etc/nginx/sites-available/showkyaw.com /etc/nginx/sites-enabled/showkyaw.com
