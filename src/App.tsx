@@ -4,6 +4,7 @@
  */
 
 import { useState, useEffect, useRef } from "react";
+import type { ReactNode } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Leaf,
@@ -191,6 +192,15 @@ export default function App() {
     const prompt = textToSend.trim();
     if (!prompt) return;
 
+    if (!currentUser) {
+      setIsAuthModalOpen(true);
+      return;
+    }
+
+    if (messages.some(message => message.role === "user")) {
+      return;
+    }
+
     // 1. Client-side suspension check
     if (isSuspended) {
       alert(
@@ -202,10 +212,7 @@ export default function App() {
     }
 
     // Add user message + empty assistant placeholder
-    const currentHistory = messages.slice(1).map(m => ({
-      role: m.role,
-      content: m.content
-    }));
+    const currentHistory: Array<{ role: "user" | "assistant"; content: string }> = [];
 
     setMessages(prev => [...prev, { role: "user" as const, content: prompt }, { role: "assistant" as const, content: "" }]);
     setInputMessage("");
@@ -319,7 +326,7 @@ export default function App() {
   };
 
   // Parse **bold** inline formatting
-  const parseBold = (text: string): React.ReactNode => {
+  const parseBold = (text: string): ReactNode => {
     const parts = text.split(/(\*\*[^*]+\*\*)/g);
     return parts.map((part, i) => {
       if (part.startsWith("**") && part.endsWith("**")) {
@@ -941,7 +948,7 @@ export default function App() {
                       type="text"
                       value={inputMessage}
                       onChange={(e) => setInputMessage(e.target.value)}
-                      disabled={isAiLoading || isSuspended}
+                      disabled={isAiLoading || isSuspended || messages.some(message => message.role === "user")}
                       placeholder={
                         isSuspended
                           ? lang === "mm"
@@ -956,7 +963,7 @@ export default function App() {
                     <button
                       id="btn-send-message"
                       type="submit"
-                      disabled={isAiLoading || !inputMessage.trim() || isSuspended}
+                      disabled={isAiLoading || !inputMessage.trim() || isSuspended || messages.some(message => message.role === "user")}
                       className="bg-teal-800 hover:bg-teal-700 disabled:bg-slate-100 disabled:text-slate-400 text-white p-3.5 rounded-xl flex items-center justify-center transition-colors shadow-sm disabled:cursor-not-allowed"
                     >
                       <Send className="h-4 w-4" />
@@ -1659,6 +1666,10 @@ export default function App() {
               ? "ဤစနစ်ရှိ အကြံပြုချက်များသည် အချက်အလက်များ လေ့လာစရာအဖြစ်သာ ရည်ရွယ်ပြီး ကျွမ်းကျင်ဆေးကုသမှုကို အစားမထိုးပါ။"
               : "This service provides educational recommendations and should not replace clinical medical consults."}
           </p>
+
+          <div className="text-[10px] text-slate-600 font-mono">
+            Created by Kyaw Win
+          </div>
 
           <div className="text-[10px] text-slate-600 font-mono">
             &copy; {new Date().getFullYear()} - ဆေးပညာနှင့် အိမ်တွင်းဆေးကုသခြင်း | Dual-Language Built with Gemini

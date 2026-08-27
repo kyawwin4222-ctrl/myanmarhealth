@@ -2,11 +2,13 @@ package handlers
 
 import (
 	"bytes"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
+	"strings"
 
 	"myanmarhealth-backend/models"
 	"myanmarhealth-backend/store"
@@ -31,10 +33,11 @@ Safety rules:
 
 type AiHandler struct {
 	store *store.Store
+	db    *sql.DB
 }
 
-func NewAiHandler(s *store.Store) *AiHandler {
-	return &AiHandler{store: s}
+func NewAiHandler(s *store.Store, db *sql.DB) *AiHandler {
+	return &AiHandler{store: s, db: db}
 }
 
 func (h *AiHandler) Advisor(w http.ResponseWriter, r *http.Request) {
@@ -51,6 +54,15 @@ func (h *AiHandler) Advisor(w http.ResponseWriter, r *http.Request) {
 
 	if req.Message == "" {
 		http.Error(w, "Message is required", http.StatusBadRequest)
+		return
+	}
+	if req.FirebaseUID == "" {
+		http.Error(w, "Login is required", http.StatusUnauthorized)
+		return
+	}
+	user, err := h.store.GetUserByFirebaseUID(req.FirebaseUID)
+	if err != nil || user == nil || user.Status == models.StatusSuspended {
+		http.Error(w, "Login is required or account is suspended", http.StatusUnauthorized)
 		return
 	}
 
@@ -137,9 +149,11 @@ func (h *AiHandler) Advisor(w http.ResponseWriter, r *http.Request) {
 	}
 
 	buf := make([]byte, 1024)
+	var responseBuilder strings.Builder
 	for {
 		n, err := resp.Body.Read(buf)
 		if n > 0 {
+			responseBuilder.Write(buf[:n])
 			_, _ = w.Write(buf[:n])
 			flusher.Flush()
 		}
@@ -149,5 +163,8 @@ func (h *AiHandler) Advisor(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			break
 		}
+	}
+	if h.db != nil {
+		_, _ = h.db.ExecContext(r.Context(), `INSERT INTO chat_history (firebase_uid, user_message, ai_response) VALUES ($1, $2, $3)`, req.FirebaseUID, req.Message, responseBuilder.String())
 	}
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
@@ -11,6 +12,7 @@ import (
 
 	"myanmarhealth-backend/handlers"
 	"myanmarhealth-backend/store"
+	_ "github.com/lib/pq"
 )
 
 func loadEnvFile(paths ...string) {
@@ -72,7 +74,16 @@ func main() {
 
 	authHandler := handlers.NewAuthHandler(userStore)
 	adminHandler := handlers.NewAdminHandler(userStore)
-	aiHandler := handlers.NewAiHandler(userStore)
+	var db *sql.DB
+	if databaseURL := os.Getenv("DATABASE_URL"); databaseURL != "" {
+		db, err = sql.Open("postgres", databaseURL)
+		if err != nil { log.Fatalf("Failed to open PostgreSQL: %v", err) }
+		if err = db.Ping(); err != nil { log.Fatalf("Failed to connect PostgreSQL: %v", err) }
+		_, err = db.Exec(`CREATE TABLE IF NOT EXISTS chat_history (id BIGSERIAL PRIMARY KEY, firebase_uid TEXT NOT NULL, user_message TEXT NOT NULL, ai_response TEXT NOT NULL, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW())`)
+		if err != nil { log.Fatalf("Failed to initialize chat history: %v", err) }
+		defer db.Close()
+	}
+	aiHandler := handlers.NewAiHandler(userStore, db)
 
 	mux := http.NewServeMux()
 
